@@ -6,8 +6,8 @@ Vue.use(VueRouter);
 //引用路由组件
 import Home from '@/pages/Home'
 import Search from '@/pages/Search'
-import Register from '@/pages/Register'
 import Login from '@/pages/Login'
+import Register from '@/pages/Register'
 
 //配置路由
 export default new VueRouter({
@@ -22,12 +22,17 @@ export default new VueRouter({
             component:Search
         },
         {
+            path:"/login",
+            component:Login
+        },
+        {
             path:"/register",
             component:Register
         },
+        //重定向，在项目跑起来的时候，访问/,立马让他定向到首页
         {
-            path:"/login",
-            component:Login
+            path:"*",
+            redirect:"/home"
         },
     ]
 })

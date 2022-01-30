@@ -1,7 +1,8 @@
 <template>
   <div>
     <Header></Header>
-    我是根目录
+    <!-- 路由组件的出口 -->
+    <router-view></router-view>
     <Footer></Footer>
   </div>
 </template>
