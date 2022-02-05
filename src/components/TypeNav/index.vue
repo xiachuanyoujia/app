@@ -1,24 +1,18 @@
 <template>
-  <div class="type-nav">
+  <div class="type-nav"> 
     <div class="container">
-      <h2 class="all">全部商品分类</h2>
-      <nav class="nav">
-        <a href="###">服装城</a>
-        <a href="###">美妆馆</a>
-        <a href="###">尚品汇超市</a>
-        <a href="###">全球购</a>
-        <a href="###">闪购</a>
-        <a href="###">团购</a>
-        <a href="###">有趣</a>
-        <a href="###">秒杀</a>
-      </nav>
-      <div class="sort">
+      <!-- 事件委派|事件代理 -->
+      <div @mouseleave="leaveIndex">
+        <h2 class="all">全部商品分类</h2>
+        <!-- 三级联动 -->
+        <div class="sort">
         <div class="all-sort-list2">
-          <div class="item" v-for="(c1) in categoryList" :key="c1.categoryId">
-            <h3>
+          <div class="item" v-for="(c1,index) in categoryList" :key="c1.categoryId" :class="{cur:currentIndex==index}">
+            <h3 @mouseenter="changeIndex(index)" >
               <a href="">{{c1.categoryName}}</a>
             </h3>
-            <div class="item-list clearfix">
+            <!-- 二级、三级分类 -->
+            <div class="item-list clearfix" :style="{display:currentIndex==index?'block':'none'}">
               <div class="subitem" v-for="(c2) in c1.categoryChild" :key="c2.categoryId">
                 <dl class="fore">
                   <dt>
@@ -35,14 +29,35 @@
           </div>
         </div>
       </div>
+      </div>
+      <nav class="nav">
+        <a href="###">服装城</a>
+        <a href="###">美妆馆</a>
+        <a href="###">尚品汇超市</a>
+        <a href="###">全球购</a>
+        <a href="###">闪购</a>
+        <a href="###">团购</a>
+        <a href="###">有趣</a>
+        <a href="###">秒杀</a>
+      </nav>
+      
     </div>
   </div>
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapState} from 'vuex';
+//最好的引入方式：按需加载
+import throttle from 'lodash/throttle';
+
 export default {
   name: "TypeNav",
+  data() {
+    return {
+      //储存用户鼠标移上哪一个一级分类
+      currentIndex:-1
+    }
+  },
   //在组件挂载完毕：可以向服务器发请求
   mounted() {
     //通知Vuex发请求,获取数据,储存于仓库当中
@@ -54,7 +69,19 @@ export default {
       //注入一个参数state，其实即为大仓库中的数据
       categoryList:state=>state.home.categoryList
     })
-  }
+  },
+  methods: {
+    //鼠标进入修改响应式数据changeIndex属性
+    //throttle回调函数别用箭头函数，可能出现上下文this
+    changeIndex:throttle(function (index){
+      // index:鼠标移上某一个一级分类的元素的索引值
+      this.currentIndex = index;
+    },50),
+    leaveIndex(){
+      //鼠标移出currentIndex,变为-1
+      this.currentIndex = -1;
+    }   
+  },
 };
 </script>
 
@@ -168,11 +195,10 @@ export default {
             }
           }
 
-          &:hover {
-            .item-list {
-              display: block;
-            }
-          }
+          
+        }
+        .cur{
+          background: skyblue;
         }
       }
     }
