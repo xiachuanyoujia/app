@@ -111,11 +111,10 @@ export default {
   },
   watch: {
     bannerList: {
+      immediate: true,
       handler(newValue, oldValue) {
         this.$nextTick(() => {
-          var mySwiper = new Swiper(
-            this.$refs.mySwiper,
-            {
+          var mySwiper = new Swiper(this.$refs.mySwiper,{
               loop: true, // 循环模式选项
 
               // 如果需要分页器
