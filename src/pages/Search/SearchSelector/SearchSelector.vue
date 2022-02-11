@@ -3,8 +3,15 @@
     <div class="type-wrap logo">
       <div class="fl key brand">品牌</div>
       <div class="value logos">
+        <!-- 品牌的地法 -->
         <ul class="logo-list">
-          <li v-for="(trademark,index) in trademarkList" :key="trademark.tmId">{{trademark.tmName}}</li>
+          <li
+            v-for="(trademark, index) in trademarkList"
+            :key="trademark.tmId"
+            @click="tradeMatkHandler(trademark)"
+          >
+            {{ trademark.tmName }}
+          </li>
         </ul>
       </div>
       <div class="ext">
@@ -12,12 +19,19 @@
         <a href="javascript:void(0);">更多</a>
       </div>
     </div>
-    <div class="type-wrap" v-for="(attr,index) in attrsList" :key="attr.attrId">
-      <div class="fl key">{{attr.attrName}}</div>
+    <!-- 平台售卖属性的地方 -->
+    <div
+      class="type-wrap"
+      v-for="(attr, index) in attrsList"
+      :key="attr.attrId"
+    >
+      <!-- 平台售卖属性:比如说颜色 -->
+      <div class="fl key">{{ attr.attrName }}</div>
       <div class="fl value">
         <ul class="type-list">
-          <li v-for="(attrValue,index) in attr.attrValueList" :key="index">
-            <a>{{attrValue}}</a>
+          <!--平台相应售卖的属性的属性值:粉色，蓝色，黑色... -->
+          <li v-for="(attrValue, index) in attr.attrValueList" :key="index" @click="attrInfo(attr,attrValue)">
+            <a>{{ attrValue }}</a>
           </li>
         </ul>
       </div>
@@ -27,11 +41,25 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from "vuex";
 export default {
   name: "SearchSelector",
-  computed:{
-    ...mapGetters(["trademarkList","attrsList"])
+  computed: {
+    ...mapGetters(["trademarkList", "attrsList"]),
+  },
+  methods: {
+    //品牌的事件处理函数
+    tradeMatkHandler(trademark) {
+      //点击了品牌（苹果），还是需要整理参数，向服务器发请求获取相应的数据进行展示
+      //老师问题:在那个组件中发请求，父组件?
+      //为什么那,因为父组件中searchParams参数是带给服务器参数，子组件组件把你点击的品牌的信息，需要给父组件传递过去---自定义事件
+      this.$emit('trademarkInfo',trademark);
+    },
+    // 平台售卖属性值的点击事件
+    attrInfo(attr,attrValue){
+      //["属性ID:属性值:属性名"]
+      this.$emit("attrInfo",attr,attrValue);
+    }
   },
 };
 </script>

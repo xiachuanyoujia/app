@@ -12,38 +12,31 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">iphone<i>×</i></li>
-            <li class="with-x">华为<i>×</i></li>
-            <li class="with-x">OPPO<i>×</i></li>
+            <!-- 分类的面包屑 -->
+            <li class="with-x" v-if="searchParams.categoryName">{{ searchParams.categoryName}}<i @click="removeCategoryName">×</i></li>
+            <!-- 关键字的面包屑 -->
+            <li class="with-x" v-if="searchParams.keyword">{{ searchParams.keyword}}<i @click="removeKeyword">×</i></li>
+            <!-- 品牌的面包屑 -->
+            <li class="with-x" v-if="searchParams.trademark">{{ searchParams.trademark.split(":")[1]}}<i @click="removeTrademark">×</i></li>
+            <!--平台的售卖的属性值展示-->
+            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">{{attrValue.split(":")[1]}}<i @click="removeAttr(index)">×</i></li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector />
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo"/>
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
+              <!-- 排序的解构 -->
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{active:isOne}" @click="changeOrder(1)">
+                  <a>综合<span v-show="isOne" class="iconfont" :class="{'icon-up':isAsc,'icon-down':isDesc}"></span></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{active:isTwo}" @click="changeOrder(2)">
+                  <a>价格<span v-show="isTwo" class="iconfont" :class="{'icon-up':isAsc,'icon-down':isDesc}"></span></a>
                 </li>
               </ul>
             </div>
@@ -95,35 +88,7 @@
             </ul>
           </div>
           <!-- 分页器 -->
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <Pagination/>
         </div>
       </div>
     </div>
@@ -145,12 +110,12 @@ export default {
         category2Id: "",
         //三级分类id
         category3Id: "",
-        //分类名字
+        //分类名字categoryName
         categoryName: "",
         //关键字
         keyword: "",
-        //排序
-        order: "",
+        //排序:初始状态应该为综合|降序
+        order: "1:desc",
         //分页器用的:代表的是当前是第几页
         pageNo: 1,
         //代表的是每一个展示数据个数
@@ -171,8 +136,10 @@ export default {
     // this.searchParams.categoryName = this.$route.query.categoryName;
     // this.searchParams.keyword = this.$route.query.keyword;
 
-    //0bject. assign:ES6新增的语法， 合并对象
+    //0bject.assign:ES6新增的语法， 合并对象
     //在发请求之前，把接口需要传递参数，进行整理(在给服务器发请求之前，把参数整理好，服务器就会返回查询的数据)
+    // console.log("@@@",this.$store.query);
+    // console.log("@",this.$store.params);
     Object.assign(this.searchParams, this.$store.query, this.$route.params);
   },
   components: {
@@ -184,33 +151,130 @@ export default {
     this.$store.dispatch("getSearchList", {});
     */
     this.getData();
+    // console.log(this.searchParams);
   },
   methods: {
     //向服务器发请求获取search模块数据(根据参数不同返回不同的数据进行展示)
-    //
+    //将来需要再次发请求,你只需要在调用这个函数即可
     getData() {
       this.$store.dispatch("getSearchList", this.searchParams);
+    },
+    //删除分类的名字
+    removeCategoryName() {
+      //带给服务器参数说明可有可无的:如果属性值为空的字符串还是会把相应的字段带给服务器
+      //但是你把相应的字段变为undefined，当前这个字段不会带给服务器
+      this.searchParams.categoryName = undefined;
+      this.searchParams.category1Id = undefined;
+      this.searchParams.category2Id = undefined;
+      this.searchParams.category3Id = undefined;
+      this.getData();
+      //地址栏也需要需改:进行路由跳转(现在的路由跳转只是跳转到自己这里)
+      //严谨:本意是删除query，如果路径当中出现params不应该删除，路由跳转的时候应该带着
+      if (this.$route.params) {
+        this.$router.push({ name: "search", params: this.$route.params });
+      }
+    },
+    // 删除关键字
+    removeKeyword() {
+      //给服务器带的参数searchParams的keyword置空
+      this.searchParams.keyword = undefined;
+      //再次发请求
+      this.getData();
+      //通知兄弟组件Header清除关键字
+      this.$bus.$emit("clear");
+      //路由的跳转
+      if (this.$route.query) {
+        this.$router.push({ name: "search", query: this.$route.query });
+      }
+    },
+    //自定义事件回调
+    trademarkInfo(trademark){
+      // console.log("@@@",trademark)
+      //1:整理品牌字段的参数“ID:品牌名称”
+      this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
+      //再次发请求获取search模块列表数据进行展示
+      this.getData();
+    },
+    //删除品牌的信息
+    removeTrademark(){
+      //将品牌信息置空
+      this.searchParams.trademark = undefined;
+      //再次发起请求
+      this.getData();
+    },
+    //收集平台属性地方回调函数（自定义事件)
+    attrInfo(attr,attrValue){
+      //["属性ID:属性值:属性名"]
+      console.log(attr,attrValue);
+      //参数格式整理好
+      let props = `${attr.attrId}:${attrValue}:${attr.attrName}`;
+      //数组去重
+      //if语句里面只有一行代码:可以省略大花括
+      if (this.searchParams.props.indexOf(props)== -1) this.searchParams.props.push(props);
+      //再次发起请求
+      this.getData();
+    },
+    // removeAttr删除售卖的属性
+    removeAttr(index){
+      //再次整理参数
+      this.searchParams.props.splice(index,1);
+      //再次发请求
+      this.getData();
+    },
+    //排序的操作
+    changeOrder(flag){
+      //flag形参:它是一个标记，代表用户点击的是综合（1）价格（2)[用户点击的时候传递进来的]let originOrder = this.searchParams.order;
+      let originOrder = this.searchParams.order;
+      //这里获取到的是最开始的状态
+      let originFlag = this.searchParams.order.split(":")[0];
+      let originSort = this.searchParams.order.split(":")[1];
+      // console.log(originFlag,"@@@@",originSort)
+      //准备一个新的order属性值
+      let newOrder = "";
+      //点击的是综合
+      if (flag == originFlag) {
+        newOrder = `${originFlag}:${originSort == "desc" ? "asc" : "desc"}`;
+      }else{
+        //点击的是价格
+        newOrder = `${flag}:${"desc"}`;
+      }
+      //将新的order赋予searchParams
+      this.searchParams.order = newOrder;
+      //再次发请求
+      this.getData();
     },
   },
   computed: {
     //mapGetters里面的写法:传递的数组，因为getters计算是没有划分模块[home，search]
     //注：如果vue开发者工具查看有划分模块，可能是开启了命名空间模式
     ...mapGetters(["goodsList"]),
+    isOne(){
+      return this.searchParams.order.indexOf('1') != -1;
+    },
+    isTwo(){
+      return this.searchParams.order.indexOf('2') != -1;
+    },
+    isAsc(){
+      return this.searchParams.order.indexOf('asc')!=-1;
+    },
+    isDesc(){
+      return this.searchParams.order.indexOf('desc')!=-1;
+    },
   },
   //数据监听:监听组件实例身上的属性的属性值变化
   watch: {
     //监听路由的信息是否发生变化，如果发生变化，再次发起请求
     $route(newValue, oldValue) {
       //再次发请求之前整理带给服务器参数
-      Object.assign(this.searchParams, this.$store.query, this.$route.params);
+      Object.assign(this.searchParams, this.$route.query, this.$route.params);
       //再次发起ajax请求
       this.getData();
       // console.log(this.searchParams);
       //每一次请求完毕，应该把相应的1、2、3级分类的id置空的，让他接受下一次的相应1、2、3
-      //分类名字与关键字不用清理:因为每一次路 由发生变化的时候，都会给 他赋予新的数据
-      this.searchParams.category1Id = " ";
-      this.searchParams.category2Id = " ";
-      this.searchParams.category3Id = " ";
+      //分类名字与关键字不用清理:因为每一次路 由发生变化的时候，都会给他赋予新的数据
+      this.searchParams.category1Id = undefined;
+      this.searchParams.category2Id = undefined;
+      this.searchParams.category3Id = undefined;
     },
   },
 };
