@@ -1,13 +1,11 @@
 //配置路由的地方
 import Vue from 'vue';
+import routes from './routes'
+//引入vue-router路由插件
 import VueRouter from 'vue-router';
 //使用插件
 Vue.use(VueRouter);
-//引用路由组件
-import Home from '@/pages/Home'
-import Search from '@/pages/Search'
-import Login from '@/pages/Login'
-import Register from '@/pages/Register'
+
 //先把VueRoutter原型对象的push,先保存一份
 let originPush = VueRouter.prototype.push;
 let originReplace = VueRouter.prototype.replace;
@@ -19,18 +17,18 @@ let originReplace = VueRouter.prototype.replace;
 //call || apply区别
 //相同点：都可以调用函数一次，都可以篡改函数的上下文一次
 //不同点：call与apply传递参数：call传递参数用逗号隔开，apply方法执行，传递数组
-VueRouter.prototype.push = function (location,resolve,reject){
+VueRouter.prototype.push = function (location, resolve, reject) {
     if (resolve && reject) {
-        originPush.call(this,location,resolve,reject);
+        originPush.call(this, location, resolve, reject);
     } else {
-        originPush.call(this,location,()=>{},()=>{});        
+        originPush.call(this, location, () => { }, () => { });
     }
 }
-VueRouter.prototype.replace = function(location,resolve,reject){
+VueRouter.prototype.replace = function (location, resolve, reject) {
     if (resolve && reject) {
-        originReplace.replace(this,location,resolve,reject);
+        originReplace.replace(this, location, resolve, reject);
     } else {
-        originReplace.replace(this,location,()=>{},()=>{});        
+        originReplace.replace(this, location, () => { }, () => { });
     }
 }
 
@@ -38,35 +36,10 @@ VueRouter.prototype.replace = function(location,resolve,reject){
 //配置路由
 export default new VueRouter({
     //配置路由
-    routes:[
-        {
-            path:"/home",
-            component:Home,
-            meta:{show:true}
-        },
-        {
-            path:"/search/:keyword?",
-            component:Search,
-            meta:{show:true},
-            name:'search',
-
-        },
-        {
-            path:"/login",
-            component:Login,
-            meta:{show:false}
-
-        },
-        {
-            path:"/register",
-            component:Register,
-            meta:{show:false}
-
-        },
-        //重定向，在项目跑起来的时候，访问/,立马让他定向到首页
-        {
-            path:"*",
-            redirect:"/home"
-        },
-    ]
+    routes,
+    //滚动行为
+    scrollBehavior(to, from, savedPosition) {
+        //返回的这个y=0，代表的滚动条在最上方
+        return { y: 0 }
+    }
 })
