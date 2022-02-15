@@ -21,7 +21,7 @@ const actions = {
             commit('GETGOODINFO', result.data);
         }
     },
-    //将产品添加到购物车中
+    //加入购物车的||修改某一个产品的个数
     async addOrUpdateShopCart({commit},{skuId,skuNum}){
         //加入购物车返回的解构
         //加入购物车以后（发请求），前台将参数带给服务器
