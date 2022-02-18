@@ -8,8 +8,45 @@ import Detail from '@/pages/Detail'
 import AddCartSuccess from '@/pages/AddCartSuccess'
 import ShopCart from '@/pages/ShopCart'
 import Trade from '@/pages/Trade'
+import Pay from '@/pages/Pay'
+import PaySuccess from '@/pages/PaySuccess'
+import Center from '@/pages/Center'
+//引入二级路由
+import MyOrder from '@/pages/Center/myOrder'
+import GroupOrder from '@/pages/Center/groupOrder'
+
 //配置路由
 export default[
+    {
+        path:"/center",
+        component:Center,
+        meta:{show:true},
+        //二级路由
+        children:[
+            {
+                path:"myorder",
+                component:MyOrder,
+            },
+            {
+                path:"grouporder",
+                component:GroupOrder,
+            },
+            {
+                path:'/center',
+                redirect:'/center/myorder'
+            },
+        ]
+    },
+    {
+        path:"/paysuccess",
+        component:PaySuccess,
+        meta:{show:true}
+    },
+    {
+        path:"/pay",
+        component:Pay,
+        meta:{show:true}
+    },
     {
         path:"/trade",
         component:Trade,
@@ -40,7 +77,7 @@ export default[
         path:"/search/:keyword?",
         component:Search,
         meta:{show:true},
-        name:'search',
+        name:"search",
 
     },
     {

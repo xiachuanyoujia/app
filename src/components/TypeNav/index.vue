@@ -88,7 +88,6 @@ export default {
   },
   //在组件挂载完毕：可以向服务器发请求
   mounted() {
-    
     //如果不是Home路由组件，将typeNav进行隐藏
     if (this.$route.path != "/home") {
       this.show = false;
