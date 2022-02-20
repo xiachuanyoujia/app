@@ -1,5 +1,7 @@
 <template>
   <div>
+    <!-- 使用一下自定义插件 -->
+    <!-- <h1 v-upper.erha="msg"></h1> -->
     <Header></Header>
     <!-- 路由组件的出口的地方 -->
     <router-view></router-view>
@@ -14,6 +16,11 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 export default {
   name: 'App',
+  data() {
+    return {
+      msg:"abc"
+    }
+  },
   components: {
     Header,
     Footer

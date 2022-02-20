@@ -46,7 +46,7 @@ let router = new VueRouter({
 })
 
 //全局守卫:前置守卫(在路由跳转之间进行判断)
-router.beforeEach(async(to,from,next)=>{
+router.beforeEach(async (to, from, next) => {
     //to:可以获取到你要跳转到那个路由信息
     //fron:可以获取到你从哪个路由而来的信息
     //next:放行函数  next()放行  next(path)放行到指令路由   next(false);
@@ -62,7 +62,7 @@ router.beforeEach(async(to,from,next)=>{
     //用户已经登陆了
     if (token) {
         //用户已经登陆了还想去login[不能去，停留在首页]
-        if (to.path=='/login'||to.path=='/register') {
+        if (to.path == '/login' || to.path == '/register') {
             next('/')
             // console.log('111')
         } else {
@@ -73,25 +73,31 @@ router.beforeEach(async(to,from,next)=>{
                 // console.log('222')
             } else {
                 //没有用户信息,派发action让仓库存储用户信息在跳转
-               try {
-                   //获取用户信息成功
-                await store.dispatch('getUserInfo')
-                //放行
-                next();
-                // console.log('333')
-               } catch (error) {
-                   //token失效了获取不到用户信息,从新登录
-                   //清除token
-                   await store.dispatch('userLogout');
-                   next('/login');
-               }
+                try {
+                    //获取用户信息成功
+                    await store.dispatch('getUserInfo')
+                    //放行
+                    next();
+                    // console.log('333')
+                } catch (error) {
+                    //token失效了获取不到用户信息,从新登录
+                    //清除token
+                    await store.dispatch('userLogout');
+                    next('/login');
+                }
             }
         }
     } else {
-        //未登录
-        next();
-        // console.log('444')
-
+        //未登录：不能去交易相关、不能去支付相关【pay|paysuccess】、不能去个人中心
+        //未登录去上面这些路由-----登录
+        let toPath = to.path;
+        if (toPath.indexOf('/trade') != -1 || toPath.indexOf('/pay') != -1 || toPath.indexOf('/center') != -1) {
+            //把未登录的时候向去而没有去成的信息，存储于地址栏中【路由】
+            next('/login?redirect=' + toPath);
+        } else {
+            //去的不是上面这些路由（home|search|shopCart）---放行
+            next();
+        }
     }
 })
 

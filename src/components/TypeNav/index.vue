@@ -105,6 +105,7 @@ export default {
     //throttle回调函数别用箭头函数，可能出现上下文this
     changeIndex: throttle(function (index) {
       // index:鼠标移上某一个一级分类的元素的索引值
+      // console.log(index)
       this.currentIndex = index;
     }, 50),
     //一级分类鼠标移出的事件回调
